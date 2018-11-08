@@ -14,10 +14,13 @@ class PuzzelBuilder():
         num_puzzles = int(num_puzzles)
         self.main_dir = os.getcwd()
         self.data_dir = self.main_dir + '/data/'
-        self.valid_puzzle_types = set(['solved', 'easy', 'moderate', 'difficult'])
+        self.valid_puzzle_types = set(['solved', 'easy',
+                                       'moderate', 'difficult'])
         self.solved_path = self.data_dir
         self.num_puzzles = int(num_puzzles)
-        self.puzzle_name = 'puzzle_{:0' + str(int(np.log10(num_puzzles))) + 'd}'
+        # set up str for saving
+        num_zeros = str(int(np.log10(num_puzzles)))
+        self.puzzle_name = 'puzzle_{:0' + num_zeros + 'd}'
 
     def build_dir(self, dir_name):
         os.makedirs(dir_name, exist_ok=True)
@@ -36,7 +39,7 @@ class PuzzelBuilder():
     def make_puzzle_data(self, puzzle_type):
         dir2save = self.get_puzzle_dir(puzzle_type)
         # build all the puzzles and solutions
-        self.logger.info('Building puzzles for type ' + puzzle_type) 
+        self.logger.info('Building puzzles for type ' + puzzle_type)
         for i in range(self.num_puzzles):
             save_name = self.puzzle_name.format(i) + '.txt'
             p, b = self.make_puzzle_pair(puzzle_type)
@@ -46,23 +49,23 @@ class PuzzelBuilder():
 
     def make_puzzle_pair(self, puzzle_type):
         if puzzle_type not in self.valid_puzzle_types:
-            raise ValueError(puzzle_type + ' is an unknown puzzle type, will break')
+            raise ValueError(puzzle_type +
+                             ' is an unknown puzzle type, will break')
         # puzzle
         board = SudokuMaster.makeBoard()
+        # make a copy of the board
+        board_store = [list(r) for r in board]
         if puzzle_type == 'solved':
             puzzle = board
         else:
             puzzle = SudokuMaster.makePuzzleBoard(board, puzzle_type)
-        return puzzle, board
+        return puzzle, board_store
 
     def get_puzzle_dir(self, puzzle_type):
         if puzzle_type not in self.valid_puzzle_types:
-            raise ValueError(puzzle_type + 'is an unknown puzzle type, will break')
+            raise ValueError(puzzle_type +
+                             ' is an unknown puzzle type, this will break')
         return self.data_dir + puzzle_type + '/'
-
-    def read_puzzles(self, puzzle_type):
-        # Write me #
-        dir2get = self.get_puzzle_dir(puzzle_type)
 
 
 def build_logger(log_name='puzz_build'):
@@ -99,7 +102,7 @@ def main(args):
     if args.puzzle == 'all':
         puzz_builder.make_all_puzzels()
     else:
-        puzz_builder.make_all_puzzels()
+        puzz_builder.make_puzzle_data(args.puzzle)
     log_str = 'Built ' + args.puzzle + ' puzzles'
     logger.info(log_str)
     log_str = 'Built ' + args.num_puzz + ' per puzzle type'
