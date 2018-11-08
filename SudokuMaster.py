@@ -66,7 +66,7 @@ def find_empty_location(arr, l):
 
 def solveBoard(arr2d):
     li = [0, 0]
-    if(not find_empty_location(arr2d, l)):
+    if(not find_empty_location(arr2d, li)):
         return True
     row = li[0]
     col = li[1]

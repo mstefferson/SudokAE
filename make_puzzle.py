@@ -1,43 +1,52 @@
 import SudokuMaster
 import numpy as np
 import os
+import logging
+import argparse
 
 
 class PuzzelBuilder():
-    def __init__(self, num_puzzels):
-        self.main_dir = os.cwd()
-        self.data_dir = main_dir + 'data/'
-        self.puzzel_types = set(['solved', 'easy', 'moderate', 'hard'])
+    def __init__(self, num_puzzles, logger=None):
+        if not logger:
+            self.logger = build_logger('puzzle_build')
+        else:
+            self.logger = logger
+        num_puzzles = int(num_puzzles)
+        self.main_dir = os.getcwd()
+        self.data_dir = self.main_dir + '/data/'
+        self.valid_puzzle_types = set(['solved', 'easy', 'moderate', 'difficult'])
         self.solved_path = self.data_dir
-        self.num_puzzels = num_puzzels
-        self.puzzle_name = 'puzzle_{:0' + str(np.log10(num_puzzels)) + 'd}'
+        self.num_puzzles = int(num_puzzles)
+        self.puzzle_name = 'puzzle_{:0' + str(int(np.log10(num_puzzles))) + 'd}'
 
     def build_dir(self, dir_name):
-        os.makedirs(dir_name, exists_ok=True)
+        os.makedirs(dir_name, exist_ok=True)
 
     def build_data_dirs(self):
         self.build_dir(self.data_dir)
-        for mdir in self.puzzel_types:
-            mdir2build = self.main_dir + mdir + '/'
+        for mdir in self.valid_puzzle_types:
+            mdir2build = self.data_dir + mdir + '/'
             self.build_dir(mdir2build + 'x')
             self.build_dir(mdir2build + 'y')
 
     def make_all_puzzels(self):
-        for puzzel in self.puzzel_types:
+        for puzzle in self.valid_puzzle_types:
             self.make_puzzle_data(puzzle)
 
     def make_puzzle_data(self, puzzle_type):
         dir2save = self.get_puzzle_dir(puzzle_type)
+        # build all the puzzles and solutions
+        self.logger.info('Building puzzles for type ' + puzzle_type) 
         for i in range(self.num_puzzles):
-            save_name = dir2save + self.puzzle_name.format(i)
-            p, b = make_puzzle_pair(puzzle_type)
-            np.savetxt(dir2save + 'x', p)
-            np.savetxt(dir2save + 'y', b)
+            save_name = self.puzzle_name.format(i) + '.txt'
+            p, b = self.make_puzzle_pair(puzzle_type)
+            # save them in x and y
+            np.savetxt(dir2save + 'x/' + save_name, p, fmt='%d')
+            np.savetxt(dir2save + 'y/' + save_name, b, fmt='%d')
 
     def make_puzzle_pair(self, puzzle_type):
-        valid_puzzles = ['solved', 'easy', 'moderate', 'difficult']
-        if puzzle_type not in valid_puzzles:
-            raise ValueError('Unknown puzzle type, will break')
+        if puzzle_type not in self.valid_puzzle_types:
+            raise ValueError(puzzle_type + ' is an unknown puzzle type, will break')
         # puzzle
         board = SudokuMaster.makeBoard()
         if puzzle_type == 'solved':
@@ -47,8 +56,8 @@ class PuzzelBuilder():
         return puzzle, board
 
     def get_puzzle_dir(self, puzzle_type):
-        if puzzle_type not in valid_puzzles:
-            raise ValueError('Unknown puzzle type, will break')
+        if puzzle_type not in self.valid_puzzle_types:
+            raise ValueError(puzzle_type + 'is an unknown puzzle type, will break')
         return self.data_dir + puzzle_type + '/'
 
     def read_puzzles(self, puzzle_type):
@@ -58,10 +67,10 @@ class PuzzelBuilder():
 
 def build_logger(log_name='puzz_build'):
     # set-up logger
-    logger = logging.getLogger('sat_build')
+    logger = logging.getLogger(log_name)
     logger.setLevel(logging.DEBUG)
     # create file handler which logs even debug messages
-    fh = logging.FileHandler('sat_build.log', mode='w')
+    fh = logging.FileHandler(log_name+'.log', mode='w')
     fh.setLevel(logging.INFO)
     # create console handler with a higher log level
     ch = logging.StreamHandler()
@@ -81,7 +90,7 @@ def main(args):
     # get logger
     logger = build_logger()
     # make a puzzle builder
-    puzz_builder = PuzzelBuilder(args.num_puzzles)
+    puzz_builder = PuzzelBuilder(args.num_puzz, logger)
     logger.info('Initialized puzzle builder ')
     # build puzzle directories
     puzz_builder.build_data_dirs()
@@ -91,9 +100,9 @@ def main(args):
         puzz_builder.make_all_puzzels()
     else:
         puzz_builder.make_all_puzzels()
-    log_str = 'Building ' + args.puzzle + ' puzzles'
+    log_str = 'Built ' + args.puzzle + ' puzzles'
     logger.info(log_str)
-    log_str = 'Built ' + args.num_puzzles + ' puzzles'
+    log_str = 'Built ' + args.num_puzz + ' per puzzle type'
     logger.info(log_str)
 
 
@@ -113,3 +122,5 @@ if __name__ == '__main__':
         '-n',
         '--num_puzz',
         help='number of puzzles')
+    args = argparser.parse_args()
+    main(args)

@@ -1,0 +1,8 @@
+2018-11-08 12:48:51,054 - puzz_build - INFO - Initialized puzzle builder 
+2018-11-08 12:48:51,054 - puzz_build - INFO - Built data directories
+2018-11-08 12:48:51,054 - puzz_build - INFO - Building puzzles for type moderate
+2018-11-08 12:48:52,915 - puzz_build - INFO - Building puzzles for type difficult
+2018-11-08 12:49:29,751 - puzz_build - INFO - Building puzzles for type easy
+2018-11-08 12:49:29,792 - puzz_build - INFO - Building puzzles for type solved
+2018-11-08 12:49:29,834 - puzz_build - INFO - Built all puzzles
+2018-11-08 12:49:29,834 - puzz_build - INFO - Built 10 per puzzle type
