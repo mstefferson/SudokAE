@@ -7,6 +7,7 @@ import argparse
 
 class PuzzelBuilder():
     def __init__(self, num_puzzles, logger=None):
+        # build the logger if it's not passed
         if not logger:
             self.logger = build_logger('puzzle_build')
         else:
@@ -51,7 +52,7 @@ class PuzzelBuilder():
         if puzzle_type not in self.valid_puzzle_types:
             raise ValueError(puzzle_type +
                              ' is an unknown puzzle type, will break')
-        # puzzle
+        # build board
         board = SudokuMaster.makeBoard()
         # make a copy of the board
         board_store = [list(r) for r in board]
