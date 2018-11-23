@@ -42,11 +42,7 @@ def model(hidden_layer=[128, 64, 32]):
     # this model maps an input to its encoded representation
     encoder = Model(input_img, encoded)
     # create a placeholder for an encoded (32-dimensional) input
-    encoded_input = Input(shape=(encoding_dim,))
-    # retrieve the last layer of the autoencoder model
-    # create the decoder model
-    # build decoded tensors from autoencoder layers
-    encoded_input = Input(shape=(encoding_dim,))
+    encoded_input = Input(shape=(hidden_layer[2],))
     _decode = autoencoder.layers[-3](encoded_input)
     _decode = autoencoder.layers[-2](_decode)
     _decode = autoencoder.layers[-1](_decode)
@@ -57,7 +53,7 @@ def model(hidden_layer=[128, 64, 32]):
 
 def fit(autoencoder, encoder, decoder,
         x_train, y_train, x_test, y_test,
-        ep=100, bs=64):
+        ep=10, bs=32):
     autoencoder.compile(optimizer='adadelta', loss='binary_crossentropy')
     autoencoder.fit(x_train, y_train,
                     epochs=ep,
@@ -74,11 +70,21 @@ def loss(y_true, y_pred):
 
 
 if __name__ == '__main__':
-    dir2read = 'data/easy/x/'
+    dir2read = 'data/solved/x/'
     x = read_data(dir2read)
-    dir2read = 'data/easy/y/'
+    dir2read = 'data/solved/y/'
     y = read_data(dir2read)
-    print(x[0])
-    print(y[0])
+    # build models
+    ae, en, de = model(hidden_layer=[128, 64, 32])
+    # fit models
+    encoded_imgs, decoded_imgs = fit(ae, en, de,
+                                     x, y, x, y,
+                                     ep=10, bs=32)
+    # save them in x and y
+    np.savetxt('decoded_imgs.txt', decoded_imgs, fmt='%d')
     print(x.shape)
     print(y.shape)
+    print(decoded_imgs.shape)
+    print(x[0])
+    print(y[0])
+    print(decoded_imgs[0])
